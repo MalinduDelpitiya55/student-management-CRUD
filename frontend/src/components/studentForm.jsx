@@ -13,7 +13,7 @@ function studentForm() {
                 <h4>Name : </h4>
               </td>
               <td>
-                <input type="text" className="form-control" />
+                <input type="text" className="form-control"  />
               </td>
             </tr>
             <tr>

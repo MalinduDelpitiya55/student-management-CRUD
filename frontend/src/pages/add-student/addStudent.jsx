@@ -13,7 +13,7 @@ export default function AddStudent() {
            
           />
         </div>
-        <div className="col-6">
+        <div className="col-6 mt-5">
           <Form />
         </div>
       </div>
