@@ -1,8 +1,6 @@
 import axios from "axios";
 import React, {useState} from "react";
 
-import newRequest from "./../utils/newRequest";
-
 function StudentForm() {
   const [studentData, setStudent] = useState({
     name: "",
@@ -13,6 +11,8 @@ function StudentForm() {
     gurdianContact: "",
   });
 
+  const [studentName, setStudentName] = useState(""); 
+
   const handleClear = () => {
     setStudent({
       name: "",
@@ -22,32 +22,44 @@ function StudentForm() {
       address: "",
       gurdianContact: "",
     });
+    setStudentName("");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSearch = async () => {
     try {
-      console.log(studentData);
-      const response = await axios.post(
-        `http://localhost:5174/students`,studentData,{
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+      const response = await axios.get(
+        `http://localhost:5174/students?name=${studentName}` 
       );
-
-      console.log(response);
+      setStudent(response.data); 
     } catch (error) {
       console.error(error);
     }
-    handleClear();
   };
+
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.delete(
+        `http://localhost:5174/students?name=bihan`
+      );
+      console.log(response);
+      handleClear();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleStudentChange = (e) => {
     setStudent({...studentData, [e.target.name]: e.target.value});
   };
+
+  const handleNameChange = (e) => {
+    setStudentName(e.target.value); 
+  };
+
   return (
     <div>
-      <form onSubmit={handleSubmit} className="col-lg-6">
+      <form onSubmit={handleDelete} className="col-lg-6">
         <div className="student-form">
           <h2>Student Information</h2>
           <hr />
@@ -63,7 +75,7 @@ function StudentForm() {
                     className="form-control"
                     name="name"
                     value={studentData.name}
-                    onChange={handleStudentChange}
+                    onChange={handleNameChange}
                   />
                 </td>
               </tr>
@@ -119,7 +131,7 @@ function StudentForm() {
               </tr>
               <tr>
                 <td>
-                  <h4>Address</h4>
+                  <h4>Address:</h4>
                 </td>
                 <td>
                   <input
@@ -157,11 +169,14 @@ function StudentForm() {
             Clear
           </button>
           <button
-            type="submit"
-            className="btn btn-primary"
-            onClick={handleSubmit}
+            type="button"
+            onClick={handleSearch}
+            className="btn btn-dark mx-4"
           >
-            Register
+            Search
+          </button>
+          <button type="submit" className="btn btn-danger">
+            Delete
           </button>
         </div>
       </form>

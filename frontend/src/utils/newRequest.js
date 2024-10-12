@@ -1,8 +1,9 @@
 import axios from "axios";
-import dotenv from 'dotenv';
-dotenv.config();
+
+const BASE_URL = "http://localhost:5174/";
+
 const newRequest = axios.create({
-    baseURL: process.env.BASE_URL,
+    baseURL: BASE_URL,  
     withCredentials: true,
 });
 
