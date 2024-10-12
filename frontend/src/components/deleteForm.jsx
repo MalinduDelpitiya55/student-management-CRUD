@@ -11,7 +11,9 @@ function StudentForm() {
     gurdianContact: "",
   });
 
-  const [studentName, setStudentName] = useState(""); 
+  const [studentName, setStudentName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleClear = () => {
     setStudent({
@@ -23,29 +25,60 @@ function StudentForm() {
       gurdianContact: "",
     });
     setStudentName("");
+    setError("");
   };
 
   const handleSearch = async () => {
+    if (!studentName) {
+      setError("Please enter a student's name to search.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
     try {
       const response = await axios.get(
-        `http://localhost:5174/students?name=${studentName}` 
+        `http://localhost:5174/students/search/${studentName}`
       );
-      setStudent(response.data); 
+        console.log(response);
+        
+      const fetchedStudentData = response.data || {
+        name: "",
+        age: "",
+        contact: "",
+        gurdianName: "",
+        address: "",
+        gurdianContact: "",
+      };
+      setStudent(fetchedStudentData);
     } catch (error) {
-      console.error(error);
+      setError("Failed to fetch student data. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.delete(
-        `http://localhost:5174/students?name=bihan`
-      );
-      console.log(response);
-      handleClear();
-    } catch (error) {
-      console.error(error);
+
+    if (!studentName) {
+      setError("Please enter a student's name to delete.");
+      return;
+    }
+
+    if (window.confirm("Are you sure you want to delete this student?")) {
+      setLoading(true);
+      setError("");
+
+      try {
+        await axios.delete(`http://localhost:5174/students/${studentName}`);
+        handleClear();
+      } catch (error) {
+        setError("Failed to delete student. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -54,11 +87,12 @@ function StudentForm() {
   };
 
   const handleNameChange = (e) => {
-    setStudentName(e.target.value); 
+    setStudentName(e.target.value);
   };
 
   return (
     <div>
+      {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleDelete} className="col-lg-6">
         <div className="student-form">
           <h2>Student Information</h2>
@@ -74,7 +108,7 @@ function StudentForm() {
                     type="text"
                     className="form-control"
                     name="name"
-                    value={studentData.name}
+                    value={studentName}
                     onChange={handleNameChange}
                   />
                 </td>
@@ -88,7 +122,7 @@ function StudentForm() {
                     type="text"
                     className="form-control"
                     name="age"
-                    value={studentData.age}
+                    value={studentData.age || ""} // Default to empty string
                     onChange={handleStudentChange}
                   />
                 </td>
@@ -102,7 +136,7 @@ function StudentForm() {
                     type="text"
                     className="form-control"
                     name="contact"
-                    value={studentData.contact}
+                    value={studentData.contact || ""} // Default to empty string
                     onChange={handleStudentChange}
                   />
                 </td>
@@ -124,7 +158,7 @@ function StudentForm() {
                     type="text"
                     className="form-control"
                     name="gurdianName"
-                    value={studentData.gurdianName}
+                    value={studentData.gurdianName || ""} // Default to empty string
                     onChange={handleStudentChange}
                   />
                 </td>
@@ -138,7 +172,7 @@ function StudentForm() {
                     type="text"
                     className="form-control"
                     name="address"
-                    value={studentData.address}
+                    value={studentData.address || ""} // Default to empty string
                     onChange={handleStudentChange}
                   />
                 </td>
@@ -152,7 +186,7 @@ function StudentForm() {
                     type="text"
                     className="form-control"
                     name="gurdianContact"
-                    value={studentData.gurdianContact}
+                    value={studentData.gurdianContact || ""} // Default to empty string
                     onChange={handleStudentChange}
                   />
                 </td>
@@ -172,11 +206,12 @@ function StudentForm() {
             type="button"
             onClick={handleSearch}
             className="btn btn-dark mx-4"
+            disabled={loading}
           >
-            Search
+            {loading ? "Searching..." : "Search"}
           </button>
-          <button type="submit" className="btn btn-danger">
-            Delete
+          <button type="submit" className="btn btn-danger" disabled={loading}>
+            {loading ? "Deleting..." : "Delete"}
           </button>
         </div>
       </form>
