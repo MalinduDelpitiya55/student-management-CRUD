@@ -6,80 +6,68 @@ function StudentForm() {
     name: "",
     age: "",
     contact: "",
-    gurdianName: "",
+    guardianName: "",
     address: "",
-    gurdianContact: "",
+    guardianContact: "",
   });
 
   const [studentName, setStudentName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleClear = () => {
     setStudent({
       name: "",
       age: "",
       contact: "",
-      gurdianName: "",
+      guardianName: "",
       address: "",
-      gurdianContact: "",
+      guardianContact: "",
     });
     setStudentName("");
-    setError("");
   };
 
   const handleSearch = async () => {
-    if (!studentName) {
-      setError("Please enter a student's name to search.");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
     try {
       const response = await axios.get(
         `http://localhost:5174/students/search/${studentName}`
       );
-        console.log(response);
-        
-      const fetchedStudentData = response.data || {
-        name: "",
-        age: "",
-        contact: "",
-        gurdianName: "",
-        address: "",
-        gurdianContact: "",
-      };
-      setStudent(fetchedStudentData);
+      console.log(response);
+
+      if (response.data) {
+          const fetchedStudentData = response.data;
+          
+        setStudent({
+          name: fetchedStudentData[0].name || "",
+          age: fetchedStudentData[0].age || "",
+          contact: fetchedStudentData[0].contact || "",
+          guardianName: fetchedStudentData[0].guardian_name || "",
+          address: fetchedStudentData[0].address || "",
+          guardianContact: fetchedStudentData[0].guardian_contact || "",
+        });
+      } else {
+        setStudent({
+          name: "",
+          age: "",
+          contact: "",
+          guardianName: "",
+          address: "",
+          guardianContact: "",
+        });
+      }
     } catch (error) {
-      setError("Failed to fetch student data. Please try again.");
-    } finally {
-      setLoading(false);
+      console.log(error);
+      
     }
   };
 
   const handleDelete = async (e) => {
     e.preventDefault();
-
-    if (!studentName) {
-      setError("Please enter a student's name to delete.");
-      return;
-    }
-
-    if (window.confirm("Are you sure you want to delete this student?")) {
-      setLoading(true);
-      setError("");
-
       try {
         await axios.delete(`http://localhost:5174/students/${studentName}`);
         handleClear();
       } catch (error) {
-        setError("Failed to delete student. Please try again.");
-      } finally {
-        setLoading(false);
+        console.log("Deleting error");
+        
       }
-    }
   };
 
   const handleStudentChange = (e) => {
@@ -92,7 +80,6 @@ function StudentForm() {
 
   return (
     <div>
-      {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleDelete} className="col-lg-6">
         <div className="student-form">
           <h2>Student Information</h2>
@@ -119,10 +106,10 @@ function StudentForm() {
                 </td>
                 <td>
                   <input
-                    type="text"
+                    type="number"
                     className="form-control"
                     name="age"
-                    value={studentData.age || ""} // Default to empty string
+                    value={studentData.age}
                     onChange={handleStudentChange}
                   />
                 </td>
@@ -133,10 +120,10 @@ function StudentForm() {
                 </td>
                 <td>
                   <input
-                    type="text"
+                    type="tel"
                     className="form-control"
                     name="contact"
-                    value={studentData.contact || ""} // Default to empty string
+                    value={studentData.contact}
                     onChange={handleStudentChange}
                   />
                 </td>
@@ -157,8 +144,8 @@ function StudentForm() {
                   <input
                     type="text"
                     className="form-control"
-                    name="gurdianName"
-                    value={studentData.gurdianName || ""} // Default to empty string
+                    name="guardianName"
+                    value={studentData.guardianName}
                     onChange={handleStudentChange}
                   />
                 </td>
@@ -172,7 +159,7 @@ function StudentForm() {
                     type="text"
                     className="form-control"
                     name="address"
-                    value={studentData.address || ""} // Default to empty string
+                    value={studentData.address}
                     onChange={handleStudentChange}
                   />
                 </td>
@@ -183,10 +170,10 @@ function StudentForm() {
                 </td>
                 <td>
                   <input
-                    type="text"
+                    type="tel"
                     className="form-control"
-                    name="gurdianContact"
-                    value={studentData.gurdianContact || ""} // Default to empty string
+                    name="guardianContact"
+                    value={studentData.guardianContact}
                     onChange={handleStudentChange}
                   />
                 </td>
@@ -206,12 +193,11 @@ function StudentForm() {
             type="button"
             onClick={handleSearch}
             className="btn btn-dark mx-4"
-            disabled={loading}
           >
-            {loading ? "Searching..." : "Search"}
+            Search
           </button>
-          <button type="submit" className="btn btn-danger" disabled={loading}>
-            {loading ? "Deleting..." : "Delete"}
+          <button type="submit" className="btn btn-danger">
+            Delete
           </button>
         </div>
       </form>
